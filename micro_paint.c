@@ -1,4 +1,6 @@
-#include "micro_paint.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
 
 int	ft_isspace(char c)
 {
@@ -20,7 +22,7 @@ int	check_s(void *ptr)
 		return (0);
 }
 
-int	first_line(void *ptr)
+int	first_pars(void *ptr)
 {
 	char	c;
 	int	n;
@@ -81,20 +83,81 @@ int	parsing(void *ptr)
 	return(parsing(ptr));
 }
 
+char	**fill_first(void *ptr)
+{
+	char	**str;
+	int	width;
+	int	height;
+	char	c;
+
+	fscanf(ptr, " %d", &width);
+	fscanf(ptr, " %d", &height);
+	fscanf(ptr, " %c", &c);
+	str = malloc(sizeof(char *) * (height + 1));
+	for (int i = 0; i < height; i++)
+	{
+		str[i] = malloc(sizeof(char) * (width + 1));
+		for (int j = 0; j < width; j++)
+		{
+			str[i][j] = c;
+		}
+		str[i][j] = '\n';
+	}
+	str[i] = NULL;
+	return (str);
+}
+
+void	fill_all(void *ptr)
+{
+	char	r;
+	float	x;
+	float	y;
+	float	width;
+	float	height;
+	char	c;
+
+	if (fscanf(ptr, " %c", &r) == EOF)
+		return ;
+	fscanf(ptr, " %f", &x);
+	fscanf(ptr, " %f", &y);
+	fscanf(ptr, " %f", &width);
+	fscanf(ptr, " %f", &height);
+	fscanf(ptr, " %c", &c);
+	for (int i = 0; i < height; i++)
+	{
+		for (int i = 0; i < width; i++)
+		{
+			write(1, &c, 1);
+		}
+		write(1, "\n", 1);
+	}
+	print_all(ptr);
+}
+
+void	print_free(char **str)
+{
+	for (int i = 0; str[i] != NULL; i++)
+	{
+		for (int j = 0; str[i][j]; j++)
+		{
+			write(1, 
+		} 
+	} 
+}
 
 int	main(int ac, char **av)
 {
 	void	*ptr;
-	int	i;
+	char	**str;
 
 	if (ac == 2)
 	{
-		if(!(ptr = fopen(av[1], "r")))
+		if (!(ptr = fopen(av[1], "r")))
 		{
 			write(1, "Error: Operation file corrupted\n", 32);
 			return(1);
 		}
-		if (first_line(ptr))
+		if (first_pars(ptr))
 		{
 			write(1, "Error: Operation file corrupted\n", 32);
 			return(1);
@@ -105,8 +168,15 @@ int	main(int ac, char **av)
 			return(1);
 		}
 		fclose(ptr);
+		ptr = fopen(av[1], "r");
+		fill_first(ptr);
+	//	fill_all(ptr);
+		fclose(ptr);
 	}
 	else
+	{
 		write(1, "Error: argument\n", 16);
+		return (1);
+	}
 	return (0);
 }
