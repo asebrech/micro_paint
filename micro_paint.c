@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -52,7 +53,7 @@ int	parsing(void *ptr)
 
 	if (fscanf(ptr, " %c", &c) == EOF)
 		return (0);
-	if (c != 'r' && c != 'R')
+	if (c != 'c' && c != 'C')
 		return (1);
 	printf("%c", c);
 	if (check_s(ptr))
@@ -71,12 +72,6 @@ int	parsing(void *ptr)
 	printf("%f", f);
 	if (check_s(ptr))
 		return (1);
-	fscanf(ptr, " %f", &f);
-	printf("%f", f);
-	if (f <= 0)
-		return (1);
-	if (check_s(ptr))
-		return (1);
 	if (fscanf(ptr, " %c", &c) == EOF)
 		return (1);
 	printf("%c\n", c);
@@ -89,59 +84,80 @@ char	**fill_first(void *ptr)
 	int	width;
 	int	height;
 	char	c;
+	int		i = 0;
+	int		j = 0;
 
 	fscanf(ptr, " %d", &width);
 	fscanf(ptr, " %d", &height);
 	fscanf(ptr, " %c", &c);
 	str = malloc(sizeof(char *) * (height + 1));
-	for (int i = 0; i < height; i++)
+	while (i < height)
 	{
+		j = 0;
 		str[i] = malloc(sizeof(char) * (width + 1));
-		for (int j = 0; j < width; j++)
+		while (j < width)
 		{
 			str[i][j] = c;
+			j++;
 		}
-		str[i][j] = '\n';
+		str[i][j] = '\0';
+		i++;
 	}
 	str[i] = NULL;
 	return (str);
 }
 
-void	fill_all(void *ptr)
+void	fill_all(void *ptr, char **str)
 {
 	char	r;
 	float	x;
 	float	y;
-	float	width;
-	float	height;
+	float	radius;
 	char	c;
+	int		i = 0;
+	int		j = 0;
 
 	if (fscanf(ptr, " %c", &r) == EOF)
 		return ;
 	fscanf(ptr, " %f", &x);
 	fscanf(ptr, " %f", &y);
-	fscanf(ptr, " %f", &width);
-	fscanf(ptr, " %f", &height);
+	fscanf(ptr, " %f", &radius);
 	fscanf(ptr, " %c", &c);
-	for (int i = 0; i < height; i++)
+	while (str[i] != NULL)
 	{
-		for (int i = 0; i < width; i++)
+		j = 0;
+		while (str[i][j])
 		{
-			write(1, &c, 1);
+			if ((sqrt((x - j) * (x - j) + (y - i) * (y - i))) < radius)
+			{
+				if (c == 'C' || (sqrt((x - (j - 1)) * (x - (j - 1)) + (y - i) * (y - i))) > radius
+						|| (sqrt((x - (j + 1)) * (x - (j + 1)) + (y - i) * (y - i))) > radius
+						|| (sqrt((x - j) * (x - j) + (y - (i - 1)) * (y - (i - 1)))) > radius
+						|| (sqrt((x - j) * (x - j) + (y - (i + 1) * (y - (i + 1))) > radius)
+					str[i][j] = c;
+			}
+			j++;
 		}
-		write(1, "\n", 1);
+		i++;
 	}
-	print_all(ptr);
+	fill_all(ptr, str);
 }
 
 void	print_free(char **str)
 {
-	for (int i = 0; str[i] != NULL; i++)
+	int	i = 0;
+	int j = 0;
+
+	while (str[i] != NULL)
 	{
-		for (int j = 0; str[i][j]; j++)
+		j = 0;
+		while (str[i][j])
 		{
-			write(1, 
+			write(1, &str[i][j], 1);
+			j++;
 		} 
+		write(1, "\n", 1);
+		i++;
 	} 
 }
 
@@ -169,8 +185,9 @@ int	main(int ac, char **av)
 		}
 		fclose(ptr);
 		ptr = fopen(av[1], "r");
-		fill_first(ptr);
-	//	fill_all(ptr);
+		str = fill_first(ptr);
+		fill_all(ptr, str);
+		print_free(str);
 		fclose(ptr);
 	}
 	else
